@@ -15,17 +15,23 @@ import { GameService } from '../services/game';
 export class SearchByClass implements OnInit {
   classifications: Classification[] = [];
   games: Game[] = [];
-  selectedClassId: number = 0; // 0 = toutes les classes
+  selectedClassId: number = 0; // 0 = all classes
 
   constructor(private gameService: GameService) {}
 
   ngOnInit(): void {
-    this.classifications = this.gameService.listeClassifications();
-    this.games = this.gameService.rechercherParClass(0);
+    this.gameService.listeClassifications().subscribe(cats => {
+      this.classifications = cats._embedded.classifications;
+    });
+    this.gameService.rechercherParClass(0).subscribe(gs => {
+      this.games = gs;
+    });
   }
 
   onChange(id: number) {
     this.selectedClassId = Number(id);
-    this.games = this.gameService.rechercherParClass(this.selectedClassId);
+    this.gameService.rechercherParClass(this.selectedClassId).subscribe(gs => {
+      this.games = gs;
+    });
   }
 }

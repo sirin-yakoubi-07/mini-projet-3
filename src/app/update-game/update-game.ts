@@ -25,18 +25,23 @@ export class UpdateGame implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.classifications = this.gameService.listeClassifications();
-    this.currentGame = this.gameService.consulterGame(
-      this.activatedRoute.snapshot.params['id']
-    ) || new Game();
-    if (this.currentGame && this.currentGame.classification) {
-      this.updatedClassId = this.currentGame.classification.idClass;
-    }
+    this.gameService.listeClassifications().subscribe(cats => {
+      this.classifications = cats._embedded.classifications;
+    });
+
+    this.gameService.consulterGame(this.activatedRoute.snapshot.params['id'])
+      .subscribe(g => {
+        this.currentGame = g;
+        if (g.classification) {
+          this.updatedClassId = g.classification.idClass;
+        }
+      });
   }
 
   updateGame() {
     this.currentGame.classification = this.gameService.consulterClassification(this.updatedClassId);
-    this.gameService.updateGame(this.currentGame);
-    this.router.navigate(['/games']);
+    this.gameService.updateGame(this.currentGame).subscribe(() => {
+      this.router.navigate(['/games']);
+    });
   }
 }

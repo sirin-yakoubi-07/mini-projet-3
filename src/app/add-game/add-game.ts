@@ -23,7 +23,10 @@ export class AddGame implements OnInit {
   constructor(private gameService: GameService, private router: Router) {}
 
   ngOnInit(): void {
-    this.classifications = this.gameService.listeClassifications();
+    this.gameService.listeClassifications().subscribe(clas => {
+  console.log(clas);
+  this.classifications = clas._embedded.classifications;
+});
     if (this.classifications.length > 0) {
       this.newIdClass = this.classifications[0].idClass; // première classe sélectionnée par défaut
     }

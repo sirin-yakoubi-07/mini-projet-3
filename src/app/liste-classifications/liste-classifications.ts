@@ -68,5 +68,5 @@ export class ListeClassifications implements OnInit {
     this.updatedClass = { ...clas };
     this.ancienId = clas.idClass;
     this.ajout = false;
-  }
+  }                           
 }

@@ -12,17 +12,20 @@ import { GameService } from '../services/game';
   styleUrl: './search-by-name.css'
 })
 export class SearchByName implements OnInit {
-  gamename: string = '';
   games: Game[] = [];
+  searchedName: string = '';
 
   constructor(private gameService: GameService) {}
 
   ngOnInit(): void {
-    this.games = this.gameService.rechercherParNom('');
+    this.gameService.listeGames().subscribe(gs => {
+      this.games = gs;
+    });
   }
 
-  rechercherGames(nom: string) {
-    this.gamename = nom;
-    this.games = this.gameService.rechercherParNom(nom);
+  searchGames() {
+    this.gameService.rechercherParNom(this.searchedName).subscribe(gs => {
+      this.games = gs;
+    });
   }
-}
+}   

@@ -18,17 +18,19 @@
         <tbody>
           @for (game of games; track game.idgame; let i = $index) {
             <tr>
-              <td>{{i + 1}}</td>
+              <td>{{i + 1 }}</td>
               <td>{{game.idgame}}</td>
               <td>{{game.gamename}}</td>
               <td>{{game.gameprice}}</td>
               <td>{{game.creationdate | date}}</td>
               <td>{{game.classification?.nomClass}}</td>
-            @if(authService.isAdmin()) { 
-<td><a class="btn btn-danger"  (click)="supprimerGame(game)">delete</a></td>  
-<td><a class="btn btn-success" [routerLink]="['/updateGame',game.idgame]">modify</a></td> 
-}
+              @if (authService.isAdmin()) {
+                <td><a class="btn btn-danger" (click)="supprimerGame(game)">delete</a></td>
+                <td><a class="btn btn-success" [routerLink]="['/updateGame',game.idgame]">modify</a></td>
+              }
             </tr>
+          } @empty {
+            <tr><td colspan="7">No games found.</td></tr>
           }
         </tbody>
       </table>

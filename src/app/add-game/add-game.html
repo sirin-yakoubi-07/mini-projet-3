@@ -3,9 +3,9 @@
     <h2>ADD Game :</h2>
   </div>
   <form>
-    <div class="col-sm-2 col-md-2 col-lg-2" hidden >
+    <div class="col-sm-2 col-md-2 col-lg-2" hidden>
       <label>ID Game</label>
-      <input type="text" [(ngModel)]="newGame.idgame" name="idgame" class="form-control">
+      <input type="text" class="form-control"  disabled>
     </div>
 
     <div class="col-sm-4 col-md-4 col-lg-4">
@@ -15,7 +15,7 @@
 
     <div class="col-sm-2 col-md-2 col-lg-2">
       <label>Game Price</label>
-      <input type="number" [(ngModel)]="newGame.gameprice" name="gameprice" class="form-control">
+      <input type="text" inputmode="decimal"  [(ngModel)]="priceText" name="gameprice" class="form-control">
     </div>
 
     <div class="col-sm-4 col-md-4 col-lg-4">
@@ -26,14 +26,15 @@
     <div class="col-sm-4 col-md-4 col-lg-4">
       <label>Classification</label>
       <select class="form-control form-control-lg" id="idClass" name="idClass" [(ngModel)]="newIdClass">
+        <option [ngValue]="null"></option>
         @for (cls of classifications; track cls.idClass) {
-          <option [value]="cls.idClass"> {{cls.nomClass}} </option>
+          <option [ngValue]="cls.idClass"> {{cls.nomClass}} </option>
         }
       </select>
     </div>
 
     <div class="mt-2">
-      <button type="submit" (click)="addGame()" class="btn btn-success">Add</button>
+      <button type="button" (click)="addGame()" [disabled]="saving" class="btn btn-success">Add</button>
       <div>
         <h3>{{message}}</h3>
       </div>

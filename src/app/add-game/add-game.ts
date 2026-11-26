@@ -16,28 +16,52 @@ import { Classification } from '../model/classification.model';
 export class AddGame implements OnInit {
   newGame = new Game();
   message: string = '';
-  classifications!: Classification[];
-  newIdClass!: number;
-  newClassification!: Classification;
+  classifications: Classification[] = [];
+  newIdClass: number | null = null; // nothing selected by default
+  priceText: string = '';           // the price is typed as normal text, converted when saving
+  saving: boolean = false;          // prevents adding the same game twice (double click)
 
   constructor(private gameService: GameService, private router: Router) {}
 
   ngOnInit(): void {
-    this.gameService.listeClassifications().subscribe(clas => {
-  console.log(clas);
-  this.classifications = clas._embedded.classifications;
-});
-    if (this.classifications.length > 0) {
-      this.newIdClass = this.classifications[0].idClass; // première classe sélectionnée par défaut
-    }
+    this.gameService.listeClassifications().subscribe({
+      next: clas => {
+        this.classifications = clas._embedded?.classifications ?? [];
+      },
+      error: err => console.error('Cannot load classifications', err)
+    });
   }
 
   addGame() {
-    this.newClassification = this.gameService.consulterClassification(this.newIdClass);
-    this.newGame.classification = this.newClassification;
+    if (this.saving) return;
+    if (!this.newGame.gamename) {
+      this.message = 'Please enter the game name';
+      return;
+    }
 
-    this.gameService.ajouterGame(this.newGame);
-    this.message = `Game ${this.newGame.gamename} add successfully`;
-    this.router.navigate(['/games']); // retour automatique à la page d'accueil
+    // convert the typed price (accepts 59.99 or 59,99)
+    const price = Number(this.priceText.replace(',', '.'));
+    if (this.priceText.trim() === '' || isNaN(price) || price < 0) {
+      this.message = 'Please enter a valid price (example: 59.99)';
+      return;
+    }
+    this.newGame.gameprice = price;
+
+    // the classification is only set if the user chose one
+    this.newGame.classification = this.newIdClass != null
+      ? this.classifications.find(c => c.idClass == this.newIdClass)
+      : undefined;
+
+    this.saving = true;
+    this.gameService.ajouterGame(this.newGame).subscribe({
+      next: () => {
+        this.router.navigate(['/games']); // the list reloads from the backend
+      },
+      error: err => {
+        console.error(err);
+        this.saving = false;
+        this.message = 'Error: the game was not added';
+      }
+    });
   }
 }

@@ -13,7 +13,7 @@ import { Auth } from '../services/auth';
   styleUrl: './games.css'
 })
 export class GamesComponent implements OnInit {
-  games!: Game[];
+  games: Game[] = [];
 
   constructor(private gameService: GameService,
     public authService: Auth) { }
@@ -23,8 +23,9 @@ export class GamesComponent implements OnInit {
   }
 
   chargerGames() {
-    this.gameService.listeGames().subscribe(gs => {
-      this.games = gs;
+    this.gameService.listeGames().subscribe({
+      next: gs => this.games = gs,
+      error: err => console.error('API error (is Spring Boot running on 8081?)', err)
     });
   }
 

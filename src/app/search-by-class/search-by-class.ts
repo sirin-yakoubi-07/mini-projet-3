@@ -21,7 +21,7 @@ export class SearchByClass implements OnInit {
 
   ngOnInit(): void {
     this.gameService.listeClassifications().subscribe(cats => {
-      this.classifications = cats._embedded.classifications;
+      this.classifications = cats._embedded?.classifications ?? [];
     });
     this.gameService.rechercherParClass(0).subscribe(gs => {
       this.games = gs;

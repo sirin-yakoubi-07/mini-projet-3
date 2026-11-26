@@ -15,7 +15,7 @@
 
     <div class="col-sm-2 col-md-2 col-lg-2">
       <label>Prix Game</label>
-      <input type="number" [(ngModel)]="currentGame.gameprice" name="gameprice" class="form-control">
+      <input type="text" inputmode="decimal" [(ngModel)]="priceText" name="gameprice" class="form-control">
     </div>
 
     <div class="col-sm-4 col-md-4 col-lg-4">
@@ -28,13 +28,14 @@
       <label>Calassification</label>
       <select class="form-control form-control-lg" id="idClass" name="idClass" [(ngModel)]="updatedClassId">
         @for (cls of classifications; track cls.idClass) {
-          <option [value]="cls.idClass"> {{cls.nomClass}} </option>
+          <option [ngValue]="cls.idClass"> {{cls.nomClass}} </option>
         }
       </select>
     </div>
 
     <div class="mt-2">
-      <button type="submit" (click)="updateGame()" class="btn btn-success">Modify</button>
+      <button type="button" (click)="updateGame()" class="btn btn-success">Modify</button>
+      <div><h5 class="text-danger">{{message}}</h5></div>
     </div>
   </form>
 </div>

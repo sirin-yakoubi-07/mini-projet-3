@@ -1,8 +1,8 @@
 <div class="container mt-4">
   <div class="col-sm-4 col-md-4 col-lg-4 mb-4">
     <label>Search by name</label>
-    <input type="text" class="form-control" name="gamename" placeholder="Game name"
-           [ngModel]="gamename" (keyup)="rechercherGames($any($event.target).value)">
+    <input type="text" class="form-control" name="searchedName" placeholder="Game name"
+       [(ngModel)]="searchedName" (keyup)="searchGames()">
   </div>
 
   <div class="card">

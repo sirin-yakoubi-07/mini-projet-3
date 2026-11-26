@@ -14,7 +14,7 @@ import { UpdateClassification } from '../update-classification/update-classifica
 })
 export class ListeClassifications implements OnInit {
 
-  classifications!: Classification[];
+  classifications: Classification[] = [];
   updatedClass: Classification = { "idClass": 0, "nomClass": "" };
   ajout: boolean = true;
   ancienId: number = 0;
@@ -26,22 +26,12 @@ export class ListeClassifications implements OnInit {
   }
 
   classificationUpdated(clas: Classification) {
-    console.log("Classification updated event", clas);
-
     if (this.ajout) {
-      // ADD a new line
+      // ADD a new classification
       this.gameService.ajouterClassification(clas).
         subscribe(() => this.terminer());
     } else {
-      // MODIFY the line we clicked on
-      const nouvelId = Number(clas.idClass);
-      const dejaUtilise = this.classifications.some(
-        c => c.idClass == nouvelId && c.idClass != this.ancienId
-      );
-      if (!nouvelId || dejaUtilise) {
-        alert("Cet id existe déjà ou n'est pas valide. Choisissez un autre id.");
-        return;
-      }
+      // MODIFY the classification we clicked on (the id cannot be changed)
       this.gameService.modifierClassification(this.ancienId, clas).
         subscribe(() => this.terminer());
     }
@@ -68,5 +58,5 @@ export class ListeClassifications implements OnInit {
     this.updatedClass = { ...clas };
     this.ancienId = clas.idClass;
     this.ajout = false;
-  }                           
+  }
 }

@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, of, map } from 'rxjs';
+import { Observable, map } from 'rxjs';
 import { Game } from '../model/game.model';
 import { Classification } from '../model/classification.model';
 import { ClassificationWrapper } from '../model/classificationWrapped.model';
@@ -9,24 +9,20 @@ import { ClassificationWrapper } from '../model/classificationWrapped.model';
   providedIn: 'root'
 })
 export class GameService {
-  classifications: Classification[];
-
+  // Same port and context-path as the Spring Boot app (application.properties):
+  // server.port=8081 and server.servlet.context-path=/games
   apiURL: string = 'http://localhost:8081/games/api';
   apiURLClass: string = 'http://localhost:8081/games/classifications';
 
-  constructor(private http: HttpClient) {
-    this.classifications = [
-      { idClass: 1, nomClass: "PEGI 12" },
-      { idClass: 2, nomClass: "action" },
-      { idClass: 3, nomClass: "openworld" },
-      { idClass: 4, nomClass: "rpg" },
-      { idClass: 5, nomClass: "strategy" },
-      { idClass: 6, nomClass: "fighting" },
-      { idClass: 7, nomClass: "shooter" }
-    ];
+  constructor(private http: HttpClient) {}
+
+  // A different value on every call, so the browser never reuses an old answer:
+  // the list always comes from the backend.
+  private fresh() {
+    return { params: { _t: Date.now().toString() } };
   }
 
-  // ---- Translators (English <-> French names) ----
+  // ---- Translators (Angular names <-> Spring Boot names) ----
   private toBackend(g: Game): any {
     return {
       idGame: g.idgame,
@@ -47,9 +43,9 @@ export class GameService {
     return g;
   }
 
-  // ---- Games (Spring Boot) ----
+  // ---- Games ----
   listeGames(): Observable<Game[]> {
-    return this.http.get<any[]>(this.apiURL).pipe(
+    return this.http.get<any[]>(this.apiURL, this.fresh()).pipe(
       map(list => list.map(b => this.fromBackend(b)))
     );
   }
@@ -65,7 +61,7 @@ export class GameService {
   }
 
   consulterGame(id: number): Observable<Game> {
-    return this.http.get<any>(this.apiURL + '/' + id).pipe(map(b => this.fromBackend(b)));
+    return this.http.get<any>(this.apiURL + '/' + id, this.fresh()).pipe(map(b => this.fromBackend(b)));
   }
 
   updateGame(game: Game): Observable<Game> {
@@ -76,7 +72,7 @@ export class GameService {
     if (!idClass) {
       return this.listeGames();
     }
-    return this.http.get<any[]>(this.apiURL + '/gamesclass/' + idClass).pipe(
+    return this.http.get<any[]>(this.apiURL + '/gamesclass/' + idClass, this.fresh()).pipe(
       map(list => list.map(b => this.fromBackend(b)))
     );
   }
@@ -88,37 +84,22 @@ export class GameService {
     );
   }
 
-  // ---- Classifications ----
+  // ---- Classifications (Spring Data REST: /games/classifications) ----
   listeClassifications(): Observable<ClassificationWrapper> {
-    return this.http.get<ClassificationWrapper>(this.apiURLClass);
+    return this.http.get<ClassificationWrapper>(this.apiURLClass, this.fresh());
   }
 
   listeClassificationsObs(): Observable<Classification[]> {
-    return of(this.classifications);
-  }
-
-  consulterClassification(id: number): Classification {
-    return this.classifications.find(cls => cls.idClass == id)!;
+    return this.listeClassifications().pipe(
+      map(w => (w._embedded?.classifications ?? []) as Classification[])
+    );
   }
 
   ajouterClassification(cls: Classification): Observable<Classification> {
-    const nouvelle: Classification = {
-      idClass: Math.max(0, ...this.classifications.map(c => Number(c.idClass))) + 1,
-      nomClass: cls.nomClass
-    };
-    this.classifications.push(nouvelle);
-    return of(nouvelle);
+    return this.http.post<Classification>(this.apiURLClass, { nomClass: cls.nomClass });
   }
 
-  modifierClassification(ancienId: number, cls: Classification): Observable<Classification> {
-    const index = this.classifications.findIndex(c => c.idClass == ancienId);
-    if (index > -1) {
-      this.classifications[index] = {
-        idClass: Number(cls.idClass),
-        nomClass: cls.nomClass
-      };
-      return of(this.classifications[index]);
-    }
-    return of(cls);
+  modifierClassification(id: number, cls: Classification): Observable<Classification> {
+    return this.http.put<Classification>(this.apiURLClass + '/' + id, { nomClass: cls.nomClass });
   }
 }
